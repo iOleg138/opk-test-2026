@@ -79,13 +79,24 @@
     letter-spacing: 0.5px;
     margin-bottom: 8px;
   }
-  /* Плашка с правильным ответом */
+
+  /* === ВОПРОС СНАЧАЛА === */
+  .question-text {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    color: #3e2723;
+    padding-bottom: 12px;
+    border-bottom: 2px dashed #d7ccc8;
+  }
+
+  /* === ПЛАШКА С ОТВЕТОМ — ПОСЛЕ ВОПРОСА === */
   .answer-hint {
     background: #e3f2fd;
     border-left: 5px solid #1976d2;
     border-radius: 8px;
     padding: 12px 16px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     font-size: 15px;
   }
   .answer-hint .label {
@@ -98,9 +109,9 @@
     letter-spacing: 0.5px;
   }
   .answer-hint .value {
-    font-weight: 600;
+    font-weight: 700;
     color: #1a237e;
-    font-size: 16px;
+    font-size: 17px;
   }
   .answer-hint .ex {
     margin-top: 6px;
@@ -108,12 +119,16 @@
     font-size: 13px;
     font-style: italic;
   }
-  .question-text {
-    font-size: 17px;
+
+  .choose-label {
+    font-size: 13px;
+    color: #5d4037;
     font-weight: 600;
-    margin-bottom: 16px;
-    color: #3e2723;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
+
   .options { display: flex; flex-direction: column; gap: 8px; }
   .option {
     padding: 12px 14px;
@@ -167,7 +182,7 @@
   @media (max-width: 500px) {
     .question-text { font-size: 16px; }
     .option { font-size: 14px; padding: 10px 12px; }
-    .answer-hint .value { font-size: 15px; }
+    .answer-hint .value { font-size: 16px; }
   }
 </style>
 </head>
@@ -192,15 +207,20 @@
   <div id="quizContainer" class="card">
     <div id="questionNum" class="question-num"></div>
 
-    <!-- Плашка с правильным ответом — показывается СРАЗУ -->
+    <!-- СНАЧАЛА ВОПРОС -->
+    <div id="questionText" class="question-text"></div>
+
+    <!-- ПОСЛЕ ВОПРОСА — ПРАВИЛЬНЫЙ ОТВЕТ -->
     <div class="answer-hint" id="answerHint">
       <span class="label">✓ Правильный ответ</span>
       <span class="value" id="answerValue"></span>
       <div class="ex" id="answerEx"></div>
     </div>
 
-    <div id="questionText" class="question-text"></div>
+    <!-- ВАРИАНТЫ ДЛЯ ЗАКРЕПЛЕНИЯ -->
+    <div class="choose-label">Выбери этот ответ ниже:</div>
     <div id="options" class="options"></div>
+
     <div id="feedback" class="feedback"></div>
     <div class="actions">
       <button id="nextBtn" class="btn-primary hidden">Следующая карточка →</button>
@@ -332,7 +352,10 @@ function renderQuestion() {
   $('progressFill').style.width = `${(currentIndex / currentQuestions.length) * 100}%`;
   $('scoreText').textContent = `Выучено: ${learned}`;
 
-  // Показываем правильный ответ СРАЗУ
+  // 1) СНАЧАЛА ВОПРОС
+  $('questionText').textContent = q.q;
+
+  // 2) ПОСЛЕ ВОПРОСА — ПРАВИЛЬНЫЙ ОТВЕТ
   $('answerValue').textContent = q.correct;
   const exEl = $('answerEx');
   if (q.ex) {
@@ -343,7 +366,7 @@ function renderQuestion() {
     exEl.style.display = 'none';
   }
 
-  $('questionText').textContent = q.q;
+  // 3) НИЖЕ — ВАРИАНТЫ ДЛЯ ЗАКРЕПЛЕНИЯ
   $('feedback').className = 'feedback';
   $('feedback').textContent = '';
   $('nextBtn').classList.add('hidden');
@@ -367,7 +390,6 @@ function selectOption(btn, chosen, q) {
   const isCorrect = chosen === q.correct;
 
   if (isCorrect) {
-    // Правильно — блокируем выбор, показываем похвалу, открываем «Далее»
     answered = true;
     document.querySelectorAll('.option').forEach(o => {
       o.classList.add('disabled');
@@ -390,13 +412,12 @@ function selectOption(btn, chosen, q) {
       $('finishBtn').classList.remove('hidden');
     }
   } else {
-    // Неправильно — красная подсветка, но можно попробовать ещё раз
     btn.classList.add('wrong');
     btn.querySelector('.mark').textContent = '✗';
 
     const fb = $('feedback');
     fb.className = 'feedback show wrong';
-    fb.textContent = '❌ Попробуй ещё раз. Подсказка сверху!';
+    fb.textContent = '❌ Попробуй ещё раз. Посмотри на правильный ответ выше!';
   }
 }
 
