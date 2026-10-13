@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Олимпиада по ОПК 4 класс — тренировка</title>
+<title>ОПК — карточки для закрепления</title>
 <style>
   * { box-sizing: border-box; }
   body {
@@ -79,6 +79,35 @@
     letter-spacing: 0.5px;
     margin-bottom: 8px;
   }
+  /* Плашка с правильным ответом */
+  .answer-hint {
+    background: #e3f2fd;
+    border-left: 5px solid #1976d2;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 15px;
+  }
+  .answer-hint .label {
+    font-weight: 700;
+    color: #0d47a1;
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .answer-hint .value {
+    font-weight: 600;
+    color: #1a237e;
+    font-size: 16px;
+  }
+  .answer-hint .ex {
+    margin-top: 6px;
+    color: #37474f;
+    font-size: 13px;
+    font-style: italic;
+  }
   .question-text {
     font-size: 17px;
     font-weight: 600;
@@ -100,9 +129,8 @@
     gap: 10px;
   }
   .option:hover:not(.disabled) { border-color: #8d6e63; background: #efebe9; }
-  .option.selected { border-color: #8d6e63; background: #efebe9; }
   .option.correct { border-color: #558b2f; background: #f1f8e9; }
-  .option.wrong { border-color: #c62828; background: #ffebee; }
+  .option.wrong { border-color: #c62828; background: #ffebee; animation: shake 0.3s; }
   .option.disabled { cursor: default; }
   .option .mark {
     font-weight: bold;
@@ -110,104 +138,95 @@
     text-align: center;
     flex-shrink: 0;
   }
-  .explanation {
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  .feedback {
     margin-top: 14px;
     padding: 12px 14px;
-    background: #fafafa;
-    border-left: 4px solid #8d6e63;
     border-radius: 6px;
-    font-size: 14px;
-    color: #3e2723;
+    font-size: 15px;
+    font-weight: 600;
     display: none;
   }
-  .explanation.show { display: block; }
-  .explanation.correct { border-left-color: #558b2f; }
-  .explanation.wrong { border-left-color: #c62828; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #f1f8e9; color: #33691e; border-left: 4px solid #558b2f; }
+  .feedback.wrong { background: #ffebee; color: #b71c1c; border-left: 4px solid #c62828; }
   .actions { margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap; }
   .actions button {
-    padding: 10px 16px;
+    padding: 12px 20px;
     border: none;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
   }
-  .finish-screen { text-align: center; padding: 20px; }
-  .finish-screen h2 { font-size: 22px; margin-bottom: 8px; }
-  .score { font-size: 40px; font-weight: bold; color: #8d6e63; margin: 12px 0; }
-  .review { text-align: left; margin-top: 20px; }
-  .review-item {
-    padding: 12px;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    font-size: 14px;
-    border-left: 4px solid #d7ccc8;
-    background: #fafafa;
-  }
-  .review-item.wrong { border-left-color: #c62828; background: #ffebee; }
-  .review-item.correct { border-left-color: #558b2f; background: #f1f8e9; }
-  .review-item .q { font-weight: 600; margin-bottom: 4px; }
-  .review-item .a { color: #5d4037; }
-  .review-item .a.correct-answer { color: #558b2f; font-weight: 600; }
   .hidden { display: none; }
   @media (max-width: 500px) {
     .question-text { font-size: 16px; }
     .option { font-size: 14px; padding: 10px 12px; }
+    .answer-hint .value { font-size: 15px; }
   }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <h1>⛪ Олимпиада по ОПК</h1>
-    <p>4 класс · 2026–2027 · школьный тур</p>
+    <h1>⛪ ОПК — карточки для закрепления</h1>
+    <p>4 класс · читаем ответ → выбираем → закрепляем</p>
   </header>
 
   <div class="toolbar">
-    <button id="modeLearn" class="btn-primary">📚 Режим обучения</button>
-    <button id="modeExam" class="btn-secondary">📝 Режим экзамена</button>
     <button id="shuffleBtn" class="btn-secondary">🔀 Перемешать</button>
-    <button id="resetBtn" class="btn-danger">🔄 Сброс</button>
+    <button id="resetBtn" class="btn-danger">🔄 Начать заново</button>
   </div>
 
   <div class="stats">
-    <span id="progressText">Вопрос 1 из 65</span>
-    <span id="scoreText">Верно: 0 · Ошибок: 0</span>
+    <span id="progressText">Карточка 1 из 65</span>
+    <span id="scoreText">Выучено: 0</span>
   </div>
   <div class="progress-bar"><div id="progressFill" class="progress-fill" style="width:0%"></div></div>
 
   <div id="quizContainer" class="card">
     <div id="questionNum" class="question-num"></div>
+
+    <!-- Плашка с правильным ответом — показывается СРАЗУ -->
+    <div class="answer-hint" id="answerHint">
+      <span class="label">✓ Правильный ответ</span>
+      <span class="value" id="answerValue"></span>
+      <div class="ex" id="answerEx"></div>
+    </div>
+
     <div id="questionText" class="question-text"></div>
     <div id="options" class="options"></div>
-    <div id="explanation" class="explanation"></div>
+    <div id="feedback" class="feedback"></div>
     <div class="actions">
-      <button id="nextBtn" class="btn-primary hidden">Следующий вопрос →</button>
-      <button id="finishBtn" class="btn-primary hidden">Завершить и показать результат</button>
+      <button id="nextBtn" class="btn-primary hidden">Следующая карточка →</button>
+      <button id="finishBtn" class="btn-primary hidden">Завершить</button>
     </div>
   </div>
 
-  <div id="finishScreen" class="card finish-screen hidden">
-    <h2>Результат</h2>
-    <div id="finalScore" class="score">0 / 65</div>
-    <div id="finalComment"></div>
+  <div id="finishScreen" class="card hidden" style="text-align:center;">
+    <h2>Готово! 🎉</h2>
+    <p id="finishText" style="font-size: 16px;"></p>
     <div class="actions" style="justify-content:center;">
       <button id="restartBtn" class="btn-primary">Пройти заново</button>
     </div>
-    <div id="review" class="review"></div>
   </div>
 </div>
 
 <script>
 const QUESTIONS = [
-  // === БИБЛИЯ (1-5) ===
+  // === БИБЛИЯ ===
   { q: "Что означает слово «Евангелие»?", o: ["Священная книга", "Благая весть", "Молитва", "Заповедь"], correct: "Благая весть", ex: "Евангелие — «Благая весть», добрая новость о Христе." },
   { q: "Сколько Евангелий в Новом Завете?", o: ["Два", "Три", "Четыре", "Пять"], correct: "Четыре", ex: "От Матфея, от Марка, от Луки, от Иоанна." },
   { q: "Что такое Библия?", o: ["Молитва", "Священное Писание", "Храм", "Праздник"], correct: "Священное Писание" },
   { q: "Из каких двух частей состоит Библия?", o: ["Ветхий Завет и Новый Завет", "Псалмы и Евангелия", "Бытие и Исход", "Пророки и Апостолы"], correct: "Ветхий Завет и Новый Завет", ex: "Ветхий Завет — до Христа, Новый Завет — о Христе." },
   { q: "Что описывает Новый Завет?", o: ["Жизнь до Христа", "Жизнь Христа и первых христиан", "Историю Рима", "Ветхозаветных пророков"], correct: "Жизнь Христа и первых христиан" },
 
-  // === ПРАЗДНИКИ (6-11) ===
+  // === ПРАЗДНИКИ ===
   { q: "Какой праздник — главный для христиан?", o: ["Рождество", "Пасха", "Крещение", "Троица"], correct: "Пасха", ex: "Пасха — Воскресение Христа, победа жизни над смертью." },
   { q: "В какой реке крестился Иисус Христос?", o: ["Волга", "Нил", "Иордан", "Тигр"], correct: "Иордан" },
   { q: "Какой праздник вспоминает сошествие Святого Духа?", o: ["Рождество", "Пасха", "Троица", "Благовещение"], correct: "Троица" },
@@ -215,7 +234,7 @@ const QUESTIONS = [
   { q: "Что вспоминается в праздник Вознесения?", o: ["Рождение Христа", "Вознесение Христа на Небо", "Крещение Христа", "Сошествие Святого Духа"], correct: "Вознесение Христа на Небо" },
   { q: "Как по-другому называется праздник Крещения?", o: ["Богоявление", "Преображение", "Успение", "Воздвижение"], correct: "Богоявление" },
 
-  // === ХРАМ (12-18) ===
+  // === ХРАМ ===
   { q: "Как называется самая святая часть храма?", o: ["Иконостас", "Алтарь", "Колокольня", "Притвор"], correct: "Алтарь" },
   { q: "Что такое иконостас?", o: ["Башня с колоколами", "Стена с иконами", "Вход в храм", "Купол"], correct: "Стена с иконами" },
   { q: "Как называется башня с колоколами?", o: ["Алтарь", "Иконостас", "Колокольня", "Купол"], correct: "Колокольня" },
@@ -224,14 +243,14 @@ const QUESTIONS = [
   { q: "Что находится на куполе храма?", o: ["Икона", "Крест", "Колокол", "Свеча"], correct: "Крест" },
   { q: "Как называются центральные двери иконостаса?", o: ["Царские врата", "Святые врата", "Главные врата", "Входные врата"], correct: "Царские врата" },
 
-  // === БОГОСЛУЖЕНИЕ (19-23) ===
+  // === БОГОСЛУЖЕНИЕ ===
   { q: "Что такое Литургия?", o: ["Крестный ход", "Главное богослужение", "Церковный праздник", "Икона"], correct: "Главное богослужение" },
   { q: "Как называется вечернее богослужение?", o: ["Литургия", "Всенощное бдение", "Молебен", "Крестный ход"], correct: "Всенощное бдение" },
   { q: "Что такое крестный ход?", o: ["Шествие с иконами и хоругвями", "Чтение молитв", "Пение в храме", "Пост"], correct: "Шествие с иконами и хоругвями" },
   { q: "Что такое хоругвь?", o: ["Икона", "Полотнище с изображением Христа или святого", "Колокол", "Свеча"], correct: "Полотнище с изображением Христа или святого" },
   { q: "Как называется краткое богослужение с молитвой?", o: ["Литургия", "Молебен", "Всенощное бдение", "Крестный ход"], correct: "Молебен" },
 
-  // === ЗОЛОТОЕ КОЛЬЦО (24-35) ===
+  // === ЗОЛОТОЕ КОЛЬЦО ===
   { q: "Какой город связан с Троице-Сергиевой лаврой?", o: ["Владимир", "Сергиев Посад", "Кострома", "Суздаль"], correct: "Сергиев Посад" },
   { q: "Где находится Ипатьевский монастырь?", o: ["Ярославль", "Кострома", "Ростов Великий", "Переславль-Залесский"], correct: "Кострома" },
   { q: "Какой город Золотого кольца основан Юрием Долгоруким?", o: ["Сергиев Посад", "Переславль-Залесский", "Владимир", "Суздаль"], correct: "Переславль-Залесский" },
@@ -245,31 +264,31 @@ const QUESTIONS = [
   { q: "Какой монастырь есть в Суздале?", o: ["Спасо-Евфимиев", "Ипатьевский", "Троице-Сергиев", "Соловецкий"], correct: "Спасо-Евфимиев" },
   { q: "В каком городе Золотого кольца находится церковь Ильи Пророка?", o: ["Ярославль", "Кострома", "Владимир", "Суздаль"], correct: "Ярославль" },
 
-  // === ПЁТР ПОЛЯНСКИЙ (36-40) ===
+  // === ПЁТР ПОЛЯНСКИЙ ===
   { q: "Кто был Местоблюстителем после Патриарха Тихона?", o: ["Филарет", "Фотий", "Пётр Полянский", "Симон Ушаков"], correct: "Пётр Полянский" },
   { q: "Что такое Местоблюститель?", o: ["Строитель храма", "Временно исполняющий обязанности Патриарха", "Иконописец", "Миссионер"], correct: "Временно исполняющий обязанности Патриарха" },
   { q: "В каком году умер Патриарх Тихон?", o: ["1917", "1925", "1937", "1945"], correct: "1925" },
   { q: "В каком году погиб Пётр Полянский?", o: ["1925", "1930", "1937", "1945"], correct: "1937" },
   { q: "Где Пётр Полянский находился в заключении?", o: ["На Соловках", "В Сибири", "В Москве", "В Киеве"], correct: "На Соловках", ex: "Соловецкий лагерь — одно из мест заключения." },
 
-  // === МИССИЯ ЦЕРКВИ (41-43) ===
+  // === МИССИЯ ===
   { q: "Кто такой миссионер?", o: ["Человек, который рассказывает другим о вере", "Строитель храма", "Иконописец", "Царь"], correct: "Человек, который рассказывает другим о вере" },
   { q: "Чем занимались миссионеры?", o: ["Только молились", "Учили грамоте, переводили книги, помогали людям", "Строили дворцы", "Воевали"], correct: "Учили грамоте, переводили книги, помогали людям" },
   { q: "Почему Россия называется многонациональной страной?", o: ["В ней живут разные народы", "В ней много городов", "В ней много рек", "В ней много храмов"], correct: "В ней живут разные народы" },
 
-  // === ФИЛАРЕТ (44-47) ===
+  // === ФИЛАРЕТ ===
   { q: "Кто составил «Пространный катехизис»?", o: ["Фотий", "Пётр Полянский", "Филарет Московский", "Симон Ушаков"], correct: "Филарет Московский" },
   { q: "Что такое катехизис?", o: ["Икона", "Книга об основах веры", "Храм", "Праздник"], correct: "Книга об основах веры" },
   { q: "В каком году издан «Пространный катехизис»?", o: ["1723", "1823", "1923", "1623"], correct: "1823" },
   { q: "Кем был Филарет Московский?", o: ["Патриархом", "Митрополитом Московским", "Иконописцем", "Царём"], correct: "Митрополитом Московским" },
 
-  // === ФОТИЙ (48-51) ===
+  // === ФОТИЙ ===
   { q: "В каком веке жил патриарх Фотий?", o: ["VII век", "IX век", "XI век", "XIII век"], correct: "IX век" },
   { q: "Кто проповедовал славянам при Фотии?", o: ["Пётр и Павел", "Кирилл и Мефодий", "Сергий и Герман", "Борис и Глеб"], correct: "Кирилл и Мефодий" },
   { q: "Кем был Фотий?", o: ["Патриархом Константинопольским", "Папой Римским", "Царём", "Иконописцем"], correct: "Патриархом Константинопольским" },
   { q: "Сколько лет патриаршеству Фотия отмечается в 2026–2027 году?", o: ["1000 лет", "1100 лет", "1150 лет", "1200 лет"], correct: "1150 лет" },
 
-  // === ПРОШЛЫЙ ГОД (52-58) ===
+  // === ПРОШЛЫЙ ГОД ===
   { q: "Чем прославился Симон Ушаков?", o: ["Он был писателем", "Он был иконописцем", "Он был миссионером", "Он был патриархом"], correct: "Он был иконописцем" },
   { q: "В каком веке жил Симон Ушаков?", o: ["XV век", "XVI век", "XVII век", "XVIII век"], correct: "XVII век" },
   { q: "Где работал Симон Ушаков?", o: ["В Оружейной палате", "В Кремле", "В лавре", "В монастыре"], correct: "В Оружейной палате" },
@@ -278,23 +297,20 @@ const QUESTIONS = [
   { q: "Где находится Успенский собор?", o: ["В Московском Кремле", "В Санкт-Петербурге", "В Суздале", "В Костроме"], correct: "В Московском Кремле" },
   { q: "Где находится Казанский собор?", o: ["В Москве", "В Санкт-Петербурге", "В Казани", "В Ярославле"], correct: "В Санкт-Петербурге" },
 
-  // === ЗАДАНИЯ "НА ПОДУМАТЬ" (59-65) ===
+  // === ОБОБЩАЮЩИЕ ===
   { q: "Почему Петра Полянского называют священномучеником?", o: ["Он был священником и пострадал за веру", "Он был царём", "Он был писателем", "Он был миссионером"], correct: "Он был священником и пострадал за веру" },
   { q: "Почему Пасха — главный праздник христиан?", o: ["Это Воскресение Христа", "Это рождение Христа", "Это крещение Христа", "Это сошествие Духа"], correct: "Это Воскресение Христа" },
   { q: "Что такое алтарь?", o: ["Самая святая часть храма", "Башня с колоколами", "Стена с иконами", "Вход в храм"], correct: "Самая святая часть храма" },
-  { q: "По описанию: Белые стены, башни, звонница, древний кремль. Что это?", o: ["Ростовский кремль", "Московский Кремль", "Троице-Сергиева лавра", "Казанский собор"], correct: "Ростовский кремль" },
-  { q: "По описанию: Он поддержал князя Дмитрия Донского перед Куликовской битвой.", o: ["Сергий Радонежский", "Филарет Московский", "Фотий", "Симон Ушаков"], correct: "Сергий Радонежский" },
-  { q: "По описанию: Здесь в 1613 году Михаил Романов был призван на царство.", o: ["Кострома", "Ярославль", "Владимир", "Суздаль"], correct: "Кострома" },
+  { q: "Белые стены, башни, звонница, древний кремль. Что это?", o: ["Ростовский кремль", "Московский Кремль", "Троице-Сергиева лавра", "Казанский собор"], correct: "Ростовский кремль" },
+  { q: "Он поддержал князя Дмитрия Донского перед Куликовской битвой.", o: ["Сергий Радонежский", "Филарет Московский", "Фотий", "Симон Ушаков"], correct: "Сергий Радонежский" },
+  { q: "Здесь в 1613 году Михаил Романов был призван на царство.", o: ["Кострома", "Ярославль", "Владимир", "Суздаль"], correct: "Кострома" },
   { q: "Что лишнее: Сергиев Посад, Кострома, Владимир, Казань?", o: ["Сергиев Посад", "Кострома", "Владимир", "Казань"], correct: "Казань", ex: "Казань не входит в Золотое кольцо." }
 ];
 
 let currentQuestions = [...QUESTIONS];
 let currentIndex = 0;
-let score = 0;
-let wrong = 0;
-let mode = 'learn';
+let learned = 0;
 let answered = false;
-let userAnswers = [];
 
 const $ = id => document.getElementById(id);
 
@@ -310,14 +326,28 @@ function shuffle(arr) {
 function renderQuestion() {
   const q = currentQuestions[currentIndex];
   answered = false;
-  $('questionNum').textContent = `Вопрос ${currentIndex + 1} из ${currentQuestions.length}`;
+
+  $('questionNum').textContent = `Карточка ${currentIndex + 1} из ${currentQuestions.length}`;
+  $('progressText').textContent = `Карточка ${currentIndex + 1} из ${currentQuestions.length}`;
+  $('progressFill').style.width = `${(currentIndex / currentQuestions.length) * 100}%`;
+  $('scoreText').textContent = `Выучено: ${learned}`;
+
+  // Показываем правильный ответ СРАЗУ
+  $('answerValue').textContent = q.correct;
+  const exEl = $('answerEx');
+  if (q.ex) {
+    exEl.textContent = q.ex;
+    exEl.style.display = 'block';
+  } else {
+    exEl.textContent = '';
+    exEl.style.display = 'none';
+  }
+
   $('questionText').textContent = q.q;
-  $('explanation').className = 'explanation';
-  $('explanation').textContent = '';
+  $('feedback').className = 'feedback';
+  $('feedback').textContent = '';
   $('nextBtn').classList.add('hidden');
   $('finishBtn').classList.add('hidden');
-  $('progressText').textContent = `Вопрос ${currentIndex + 1} из ${currentQuestions.length}`;
-  $('progressFill').style.width = `${(currentIndex / currentQuestions.length) * 100}%`;
 
   const optionsEl = $('options');
   optionsEl.innerHTML = '';
@@ -333,47 +363,40 @@ function renderQuestion() {
 
 function selectOption(btn, chosen, q) {
   if (answered) return;
-  answered = true;
 
   const isCorrect = chosen === q.correct;
-  document.querySelectorAll('.option').forEach(o => {
-    o.classList.add('disabled');
-    o.onclick = null;
-    const text = o.querySelector('span:last-child').textContent;
-    if (text === q.correct) {
-      o.classList.add('correct');
-      o.querySelector('.mark').textContent = '✓';
-    } else if (text === chosen && !isCorrect) {
-      o.classList.add('wrong');
-      o.querySelector('.mark').textContent = '✗';
+
+  if (isCorrect) {
+    // Правильно — блокируем выбор, показываем похвалу, открываем «Далее»
+    answered = true;
+    document.querySelectorAll('.option').forEach(o => {
+      o.classList.add('disabled');
+      o.onclick = null;
+      o.classList.remove('wrong');
+    });
+    btn.classList.add('correct');
+    btn.querySelector('.mark').textContent = '✓';
+
+    const fb = $('feedback');
+    fb.className = 'feedback show correct';
+    fb.textContent = '🎉 Молодец! Правильно.';
+
+    learned++;
+    $('scoreText').textContent = `Выучено: ${learned}`;
+
+    if (currentIndex < currentQuestions.length - 1) {
+      $('nextBtn').classList.remove('hidden');
+    } else {
+      $('finishBtn').classList.remove('hidden');
     }
-  });
-
-  if (isCorrect) score++; else wrong++;
-
-  userAnswers.push({
-    question: q.q,
-    chosen: chosen,
-    correct: q.correct,
-    isCorrect: isCorrect,
-    ex: q.ex || ''
-  });
-
-  if (mode === 'learn') {
-    const exp = $('explanation');
-    exp.classList.add('show');
-    exp.classList.add(isCorrect ? 'correct' : 'wrong');
-    let text = isCorrect ? '✅ Верно! ' : `❌ Неверно. Правильный ответ: ${q.correct}. `;
-    if (q.ex) text += q.ex;
-    exp.textContent = text;
-  }
-
-  $('scoreText').textContent = `Верно: ${score} · Ошибок: ${wrong}`;
-
-  if (currentIndex < currentQuestions.length - 1) {
-    $('nextBtn').classList.remove('hidden');
   } else {
-    $('finishBtn').classList.remove('hidden');
+    // Неправильно — красная подсветка, но можно попробовать ещё раз
+    btn.classList.add('wrong');
+    btn.querySelector('.mark').textContent = '✗';
+
+    const fb = $('feedback');
+    fb.className = 'feedback show wrong';
+    fb.textContent = '❌ Попробуй ещё раз. Подсказка сверху!';
   }
 }
 
@@ -387,66 +410,22 @@ function nextQuestion() {
 function finishQuiz() {
   $('quizContainer').classList.add('hidden');
   $('finishScreen').classList.remove('hidden');
-  const total = currentQuestions.length;
-  const percent = Math.round((score / total) * 100);
-  $('finalScore').textContent = `${score} / ${total} (${percent}%)`;
-  let comment = '';
-  if (percent >= 90) comment = '🏆 Отлично! Ты готов к олимпиаде!';
-  else if (percent >= 75) comment = '👍 Хорошо! Повтори сложные темы.';
-  else if (percent >= 50) comment = '📚 Нормально, но стоит повторить материал.';
-  else comment = '💪 Нужно ещё потренироваться. Попробуй режим обучения!';
-  $('finalComment').textContent = comment;
-
-  const reviewEl = $('review');
-  if (mode === 'exam') {
-    const mistakes = userAnswers.filter(a => !a.isCorrect);
-    if (mistakes.length === 0) {
-      reviewEl.innerHTML = '<p style="text-align:center;color:#558b2f;font-weight:600;">Все ответы верные! 🎉</p>';
-    } else {
-      reviewEl.innerHTML = '<h3 style="margin-top:20px;">Разбор ошибок:</h3>' +
-        mistakes.map(m => `
-          <div class="review-item wrong">
-            <div class="q">${m.question}</div>
-            <div class="a">Твой ответ: <span style="color:#c62828;">${m.chosen}</span></div>
-            <div class="a correct-answer">Правильно: ${m.correct}</div>
-            ${m.ex ? `<div class="a" style="margin-top:4px;font-size:13px;">${m.ex}</div>` : ''}
-          </div>
-        `).join('');
-    }
-  } else {
-    reviewEl.innerHTML = '';
-  }
+  $('finishText').textContent = `Ты выучил(а) ${learned} из ${currentQuestions.length} карточек. Молодец!`;
 }
 
 function resetQuiz() {
   currentIndex = 0;
-  score = 0;
-  wrong = 0;
-  userAnswers = [];
+  learned = 0;
   $('quizContainer').classList.remove('hidden');
   $('finishScreen').classList.add('hidden');
   renderQuestion();
-  $('scoreText').textContent = 'Верно: 0 · Ошибок: 0';
+  $('scoreText').textContent = 'Выучено: 0';
 }
 
 $('nextBtn').onclick = nextQuestion;
 $('finishBtn').onclick = finishQuiz;
 $('restartBtn').onclick = resetQuiz;
 $('resetBtn').onclick = resetQuiz;
-
-$('modeLearn').onclick = () => {
-  mode = 'learn';
-  $('modeLearn').className = 'btn-primary';
-  $('modeExam').className = 'btn-secondary';
-  resetQuiz();
-};
-
-$('modeExam').onclick = () => {
-  mode = 'exam';
-  $('modeExam').className = 'btn-primary';
-  $('modeLearn').className = 'btn-secondary';
-  resetQuiz();
-};
 
 $('shuffleBtn').onclick = () => {
   currentQuestions = shuffle(QUESTIONS);
